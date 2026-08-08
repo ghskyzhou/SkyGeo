@@ -1,5 +1,5 @@
 /*
-Core Lib with Point, Vector and some simple calculation.
+Core Lib with Point, Vector, and some simple calculation.
 */
 
 #pragma once
@@ -8,6 +8,7 @@ Core Lib with Point, Vector and some simple calculation.
 #include <iostream>
 
 namespace geo {
+    // Definition
     using Real = long double;
     const Real eps = 1e-9;
     const Real pi = acos(-1.0);
@@ -22,6 +23,7 @@ namespace geo {
 
     using Vector = Point;
 
+    // Simple Operator
     Vector operator+(Vector a, Vector b) {
         return {a.x+b.x, a.y+b.y};
     }
@@ -46,16 +48,17 @@ namespace geo {
         return !(a == b);
     }
 
+    // Complex Operator
     Real dot(Vector a, Vector b) {
         return a.x*b.x + a.y*b.y;
     }
 
-    Real cross(Vector a, Vector b) {
+    Real cross(Vector a, Vector b) { // Counter Clockwise
         return a.x*b.y - a.y*b.x;
     }
     
     Real cross(Point a, Point b, Point c) {
-        return cross(b-a, c-a); // cross(ab, ac);
+        return cross(b-a, c-a); // ab x ac
     }
 
     Real norm2(Vector v) {
@@ -70,27 +73,30 @@ namespace geo {
         return len(a - b);
     }
 
-    int orient(Point a, Point b, Point c) {
-        return sign(cross(a, b, c)); // 1 left, -1 right, 0 line
-    }
-
-    Real angle(Vector a, Vector b) {
-        return acos(dot(a, b) / len(a) * len(b));
+    Real angle(Vector a, Vector b) { // Cautious with precision issue
+        return acos(dot(a, b) / (len(a) * len(b)));
     }
 
     Vector proj(Vector a, Vector b) { // Project b on a
         return a * (dot(a, b) / norm2(a));
     }
 
-    Point foot(Point p, Point a, Point b) {
-        return a + proj(b-a, p-a);
+    Vector rotate(Vector v, Real theta) { // Counter Clockwise
+        return {v.x * cos(theta) - v.y * sin(theta), v.x * sin(theta) + v.y * cos(theta)};
     }
 
-    Point reflect(Point p, Point a, Point b) {
-        return foot(p, a, b) * 2 - p;
+    // Judgement
+    int orient(Point a, Point b, Point c) { // a -> b -> c
+        return sign(cross(a, b, c));
+        // 1 turn left, -1 turn right, 0 line
     }
 
-    std::ostream& operator<<(std::ostream& out, Point p) {
-        return out << '(' << p.x << ", " << p.y << ")";
+    // IO Stream
+    std::istream& operator>>(std::istream& in, Point& p) {
+        return in >> p.x >> p.y;
+    }
+
+    std::ostream& operator<<(std::ostream& out, const Point& p) {
+        return out << '(' << p.x << ", " << p.y << ')';
     }
 }
