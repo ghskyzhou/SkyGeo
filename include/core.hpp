@@ -82,6 +82,14 @@ namespace geo {
         return a * (dot(a, b) / norm2(a));
     }
 
+    Point foot(Point p, Point a, Point b) {
+        return a + proj(b-a, p-a);
+    }
+
+    Point reflect(Point p, Point a, Point b) {
+        return foot(p, a, b) * 2 - p;
+    }
+
     std::ostream& operator<<(std::ostream& out, Point p) {
         return out << '(' << p.x << ", " << p.y << ")";
     }

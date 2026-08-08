@@ -1,6 +1,6 @@
 from pathlib import Path
 import re
-
+import sys
 
 # ------------------------------------------------------------
 # Paths
@@ -23,7 +23,6 @@ INCLUDE_DIR = ROOT / "include"
 INCLUDE_PATTERN = re.compile(
     r'^\s*#\s*include\s*[<"]([^>"]+)[>"]\s*$'
 )
-
 
 # ------------------------------------------------------------
 # Find experiments
@@ -80,7 +79,6 @@ def choose_experiment(experiments):
 
         print("Invalid choice. Try again.")
 
-
 # ------------------------------------------------------------
 # Header resolving
 # ------------------------------------------------------------
@@ -111,7 +109,6 @@ def resolve_local_header(header_name, current_file):
             return candidate.resolve()
 
     return None
-
 
 # ------------------------------------------------------------
 # Packing
@@ -193,7 +190,6 @@ def expand_file(path, expanded_files):
 
     return "\n".join(output)
 
-
 def pack(experiment_name):
     main_cpp = (
         EXPERIMENTS_DIR
@@ -228,7 +224,6 @@ def pack(experiment_name):
     for path in sorted(expanded_files):
         print(f"  - {path.relative_to(ROOT)}")
 
-
 # ------------------------------------------------------------
 # Main
 # ------------------------------------------------------------
@@ -236,7 +231,26 @@ def pack(experiment_name):
 def main():
     experiments = find_experiments()
 
-    experiment = choose_experiment(experiments)
+    # 命令行指定：
+    # python pack.py test
+    if len(sys.argv) >= 2:
+        experiment = sys.argv[1]
+
+        if experiment not in experiments:
+            print(f'Error: experiment "{experiment}" not found.')
+            print()
+            print("Available experiments:")
+
+            for name in experiments:
+                print(f"  - {name}")
+
+            sys.exit(1)
+
+    # 没指定参数：
+    # python pack.py
+    # 进入原来的交互选择
+    else:
+        experiment = choose_experiment(experiments)
 
     pack(experiment)
 
