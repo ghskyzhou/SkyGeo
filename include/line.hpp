@@ -74,6 +74,29 @@ namespace geo {
         // 2 parallel, 1 orthogonal, 0 other
     }
 
+    Point getLineInter(Line a, Line b) {
+        Real t = cross(b.a-a.a, dir(b)) / cross(dir(a), dir(b));
+        return a.a + dir(a) * t;
+    }
+
+    bool checkLineInter(Line a, Line b) {
+        return sign(cross(dir(a), dir(b))) != 0;
+    }
+
+    bool checkSegInter(Segment a, Segment b) {
+        int o1 = orient(a.a, a.b, b.a);
+        int o2 = orient(a.a, a.b, b.b);
+        int o3 = orient(b.a, b.b, a.a);
+        int o4 = orient(b.a, b.b, a.b);
+
+        if (o1 == 0 && checkOnSeg(b.a, a)) return true;
+        if (o2 == 0 && checkOnSeg(b.b, a)) return true;
+        if (o3 == 0 && checkOnSeg(a.a, b)) return true;
+        if (o4 == 0 && checkOnSeg(a.b, b)) return true;
+
+        return o1 * o2 < 0 && o3 * o4 < 0;
+    }
+
     std::istream& operator>>(std::istream& in, Line& l) {
         return in >> l.a >> l.b;
     }
