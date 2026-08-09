@@ -4,8 +4,6 @@ Lib with Line and Segment.
 
 #pragma once
 
-#include <cmath>
-#include <iostream>
 #include <core.hpp>
 
 namespace geo {
@@ -25,32 +23,32 @@ namespace geo {
         }
     };
 
-    Point foot(Point p, Line l) {
+    inline Point foot(Point p, Line l) {
         return l.a + proj(l.b-l.a, p-l.a);
     }
 
-    Point reflect(Point p, Line l) {
+    inline Point reflect(Point p, Line l) {
         return foot(p, l)*2 - p;
     }
 
-    int orientLine(Point p, Line l) {
+    inline int orientLine(Point p, Line l) {
         return orient(l.a, l.b, p); 
     } // 1 left, -1 right, 0 on line
     
-    bool checkOnLine(Point p, Line l) {
+    inline bool checkOnLine(Point p, Line l) {
         return orientLine(p, l) == 0;
     }
 
-    bool checkOnSeg(Point p, Segment s) {
+    inline bool checkOnSeg(Point p, Segment s) {
         return checkOnLine(p, (Line)s) && sign(dot(p-s.a, p-s.b)) <= 0;
     }
 
-    Real disPointLine(Point p, Line l) {
+    inline Real disPointLine(Point p, Line l) {
         Point ft = foot(p, l);
         return dis(ft, p);
     }
 
-    Real disPointSeg(Point p, Segment s) {
+    inline Real disPointSeg(Point p, Segment s) {
         Point ft = foot(p, (Line)s);
         if(checkOnSeg(ft, s)) {
             return dis(ft, p);
@@ -59,11 +57,11 @@ namespace geo {
         }
     }
 
-    Vector dir(Line l) { // Only for direction, no length
+    inline Vector dir(Line l) { // Only for direction, no length
         return l.b-l.a;
     }
 
-    int relationLine(Line a, Line b) {
+    inline int relationLine(Line a, Line b) {
         if(sign(cross(dir(a), dir(b))) == 0) {
             return 2;
         } else if(sign(dot(dir(a), dir(b))) == 0) {
@@ -74,16 +72,16 @@ namespace geo {
         // 2 parallel, 1 orthogonal, 0 other
     }
 
-    Point getLineInter(Line a, Line b) {
+    inline Point getLineInter(Line a, Line b) {
         Real t = cross(b.a-a.a, dir(b)) / cross(dir(a), dir(b));
         return a.a + dir(a) * t;
     }
 
-    bool checkLineInter(Line a, Line b) {
+    inline bool checkLineInter(Line a, Line b) {
         return sign(cross(dir(a), dir(b))) != 0;
     }
 
-    bool checkSegInter(Segment a, Segment b) {
+    inline bool checkSegInter(Segment a, Segment b) {
         int o1 = orient(a.a, a.b, b.a);
         int o2 = orient(a.a, a.b, b.b);
         int o3 = orient(b.a, b.b, a.a);
@@ -97,19 +95,29 @@ namespace geo {
         return o1 * o2 < 0 && o3 * o4 < 0;
     }
 
-    std::istream& operator>>(std::istream& in, Line& l) {
+    inline Real getSegDistance(Segment a, Segment b) {
+        if(checkSegInter(a ,b)) return 0;
+        return std::min({
+            disPointSeg(a.a, b),
+            disPointSeg(a.b, b),
+            disPointSeg(b.a, a),
+            disPointSeg(b.b, a)
+        });
+    }
+
+    inline std::istream& operator>>(std::istream& in, Line& l) {
         return in >> l.a >> l.b;
     }
 
-    std::ostream& operator<<(std::ostream& out, const Line& l) {
+    inline std::ostream& operator<<(std::ostream& out, const Line& l) {
         return out << "Line [" << l.a << ", " << l.b << ']';
     }
 
-    std::istream& operator>>(std::istream& in, Segment& s) {
+    inline std::istream& operator>>(std::istream& in, Segment& s) {
         return in >> s.a >> s.b;
     }
 
-    std::ostream& operator<<(std::ostream& out, const Segment& s) {
+    inline std::ostream& operator<<(std::ostream& out, const Segment& s) {
         return out << "Segment [" << s.a << ", " << s.b << ']';
     }
 }
