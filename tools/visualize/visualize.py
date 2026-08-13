@@ -3,7 +3,7 @@ import sys
 import math
 
 import pyqtgraph as pg
-from pyqtgraph.Qt import QtCore, QtWidgets
+from pyqtgraph.Qt import QtCore, QtGui, QtWidgets
 
 
 # ------------------------------------------------------------
@@ -55,6 +55,19 @@ def load_objects(path: Path):
                     x1, y1, x2, y2 = map(float, parts[1:])
                     objects.append(("SEGMENT", x1, y1, x2, y2))
 
+                elif kind == "POLYGON":
+                    if len(parts) < 2:
+                        raise ValueError
+
+                    vertex_count = int(parts[1])
+
+                    if vertex_count < 0 or len(parts) != 2 + 2 * vertex_count:
+                        raise ValueError
+
+                    coordinates = list(map(float, parts[2:]))
+                    vertices = list(zip(coordinates[::2], coordinates[1::2]))
+                    objects.append(("POLYGON", vertices))
+
                 else:
                     print(
                         f"Warning: unknown object '{kind}' "
@@ -91,6 +104,12 @@ def get_bounds(objects):
 
             xs.extend([x1, x2])
             ys.extend([y1, y2])
+
+        elif kind == "POLYGON":
+            _, vertices = obj
+
+            xs.extend(x for x, _ in vertices)
+            ys.extend(y for _, y in vertices)
 
     if not xs:
         return -5, 5, -5, 5
@@ -211,6 +230,8 @@ def create_window(objects, experiment_name):
     segment_endpoint_x = []
     segment_endpoint_y = []
 
+    polygon_index = 0
+
     # --------------------------------------------------------
     # Objects
     # --------------------------------------------------------
@@ -270,6 +291,60 @@ def create_window(objects, experiment_name):
             )
 
             plot.addItem(line)
+
+        # ------------------------
+        # Polygon
+        # ------------------------
+
+        elif kind == "POLYGON":
+            _, vertices = obj
+
+            if not vertices:
+                continue
+
+            # Golden-angle spacing keeps neighboring polygons visually distinct,
+            # while the pale translucent fill stays clean in overlap regions.
+            hue = (0.73 + polygon_index * 0.3819660112501051) % 1.0
+            outline_color = pg.hsvColor(
+                hue,
+                sat=0.72,
+                val=0.78,
+            )
+            fill_color = pg.hsvColor(
+                hue,
+                sat=0.32,
+                val=1.0,
+                alpha=0.14,
+            )
+
+            polygon_pen = pg.mkPen(
+                outline_color,
+                width=2.2,
+            )
+            polygon_brush = pg.mkBrush(fill_color)
+
+            polygon = QtGui.QPolygonF(
+                [QtCore.QPointF(x, y) for x, y in vertices]
+            )
+
+            polygon_item = QtWidgets.QGraphicsPolygonItem(polygon)
+            polygon_item.setPen(polygon_pen)
+            polygon_item.setBrush(polygon_brush)
+            polygon_item.setZValue(-10)
+            plot.addItem(polygon_item)
+
+            polygon_vertices = pg.ScatterPlotItem(
+                x=[x for x, _ in vertices],
+                y=[y for _, y in vertices],
+                size=6,
+                pen=None,
+                brush=pg.mkBrush(outline_color),
+                pxMode=True,
+            )
+            polygon_vertices.setZValue(-5)
+            plot.addItem(polygon_vertices)
+
+            polygon_index += 1
 
     # --------------------------------------------------------
     # Draw points

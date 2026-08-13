@@ -50,4 +50,18 @@ namespace geo {
             << s.b.x << ' ' << s.b.y << '\n';
     }
 
+    inline void draw(const Polygon& polygon) {
+        std::ofstream& out = visualOut();
+
+        out
+            << std::setprecision(std::numeric_limits<Real>::max_digits10)
+            << "POLYGON " << polygon.size();
+
+        for(const Point& point : polygon) {
+            out << ' ' << point.x << ' ' << point.y;
+        }
+
+        out << '\n';
+    }
+
 }

@@ -9,8 +9,8 @@ Core Lib with Point, Vector, and some simple calculation.
 #include <algorithm>
 
 namespace geo {
-    // Definition
     using Real = long double;
+
     const Real eps = 1e-9;
     const Real pi = acos(-1.0);
 
@@ -24,7 +24,6 @@ namespace geo {
 
     using Vector = Point;
 
-    // Simple Operator
     inline Vector operator+(Vector a, Vector b) {
         return {a.x+b.x, a.y+b.y};
     }
@@ -49,7 +48,6 @@ namespace geo {
         return !(a == b);
     }
 
-    // Complex Operator
     inline Real dot(Vector a, Vector b) {
         return a.x*b.x + a.y*b.y;
     }
@@ -86,13 +84,11 @@ namespace geo {
         return {v.x * cos(theta) - v.y * sin(theta), v.x * sin(theta) + v.y * cos(theta)};
     }
 
-    // Judgement
     inline int orient(Point a, Point b, Point c) { // a -> b -> c
         return sign(cross(a, b, c));
         // 1 turn left, -1 turn right, 0 line
     }
 
-    // IO Stream
     inline std::istream& operator>>(std::istream& in, Point& p) {
         return in >> p.x >> p.y;
     }
